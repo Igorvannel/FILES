@@ -66,9 +66,10 @@ if (!$transactions) {
         <div class="header__bottom">
             <div class="container">
                 <nav class="navbar navbar-expand-xl p-0 align-items-center">
-                <a class="site-logo site-title" href="dashboard.php">
-            <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/10/lazada-logo-freelogovectors.net_-640x400.png" alt="site-logo">
-          </a>
+                    <a class="site-logo site-title" href="dashboard.php">
+                        <img src="assets/images/logoicon.png" alt="site-logo">
+                        <span style="color: white; font-size: 24px; margin-left: 10px;">Lazada</span>
+                    </a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
                         <span class="menu-toggle"></span>
                     </button>
