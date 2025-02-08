@@ -1,7 +1,4 @@
 <?php
-
-header('Content-Type: text/html; charset=utf-8');
-mb_internal_encoding('UTF-8');
 // config.php
 define('DB_HOST', '192.99.42.107');
 define('DB_PORT', '5432');
