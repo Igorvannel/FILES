@@ -151,10 +151,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="header__bottom">
             <div class="container">
                 <nav class="navbar navbar-expand-xl p-0 align-items-center">
-                    <a class="site-logo site-title" href="dashboard.php">
-                        <img src="assets/images/logoicon.png" alt="site-logo">
-                        <span style="color: white; font-size: 24px; margin-left: 10px;">Lazada</span>
-                    </a>
+                <a class="site-logo site-title" href="dashboard.php">
+            <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/10/lazada-logo-freelogovectors.net_-640x400.png" alt="site-logo">
+          </a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
                         <span class="menu-toggle"></span>
                     </button>
@@ -195,43 +194,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="row justify-content-center mb-none-30">
                 <?php
                 $plans = [
-                    [
-                        'id' => 1,
-                        'name' => 'Slivestor',
-                        'return_rate' => '6%',
-                        'interval' => 'Every Week',
-                        'duration' => 'For 5 Week',
-                        'total_return' => 'Total 30% + Capital',
-                        'amount' => '200'
-                    ],
-                    [
-                        'id' => 2,
-                        'name' => 'Life Time',
-                        'return_rate' => '0.2%',
-                        'interval' => 'Every Day',
-                        'duration' => 'For Lifetime',
-                        'total_return' => 'Lifetime Earning',
-                        'amount' => '500'
-                    ],
-                    [
-                        'id' => 3,
-                        'name' => 'Black Horse',
-                        'return_rate' => '5%',
-                        'interval' => 'Every Week',
-                        'duration' => 'For 40 Week',
-                        'total_return' => 'Total 200%',
-                        'amount' => '5000'
-                    ],
-                    [
-                        'id' => 4,
-                        'name' => 'Silver',
-                        'return_rate' => '5%',
-                        'interval' => 'Every Day',
-                        'duration' => 'For 25 Day',
-                        'total_return' => 'Total 125%',
-                        'amount' => '500'
-                    ]
-                ];
+                  [
+                      'id' => 1,
+                      'name' => 'Slivestor',
+                      'return_rate' => '6%',
+                      'interval' => 'Every Week',
+                      'duration' => 'For 5 Week',
+                      'total_return' => 'Total 30% + Capital',
+                      'amount' => '200'
+                  ],
+                  [
+                      'id' => 2,
+                      'name' => 'Life Time',
+                      'return_rate' => '0.2%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For Lifetime',
+                      'total_return' => 'Lifetime Earning',
+                      'amount' => '50 - 200'
+                  ],
+                  [
+                      'id' => 3,
+                      'name' => 'Black Horse',
+                      'return_rate' => '5%',
+                      'interval' => 'Every Week',
+                      'duration' => 'For 40 Week',
+                      'total_return' => 'Total 200%',
+                      'amount' => '500 - 5000'
+                  ],
+                  [
+                      'id' => 4,
+                      'name' => 'Silver',
+                      'return_rate' => '5%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For 25 Day',
+                      'total_return' => 'Total 125%',
+                      'amount' => '500'
+                  ],
+                  [
+                      'id' => 5,
+                      'name' => 'Elephant',
+                      'return_rate' => '1.1USD',
+                      'interval' => 'Every Day',
+                      'duration' => 'For 50 Day',
+                      'total_return' => 'Total 55USD + Capital',
+                      'amount' => '500 - 700'
+                  ],
+                  [
+                      'id' => 6,
+                      'name' => 'Cobra',
+                      'return_rate' => '10USD',
+                      'interval' => 'Every Hour',
+                      'duration' => 'For 150 Hour',
+                      'total_return' => 'Total 1500USD + Capital',
+                      'amount' => '1000'
+                  ],
+                  [
+                      'id' => 7,
+                      'name' => 'Lion',
+                      'return_rate' => '0.2%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For Lifetime',
+                      'total_return' => 'Lifetime Earning',
+                      'amount' => '100 - 500'
+                  ],
+                  [
+                      'id' => 8,
+                      'name' => 'Tiger',
+                      'return_rate' => '0.2%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For Lifetime',
+                      'total_return' => 'Lifetime Earning',
+                      'amount' => '100 - 500'
+                  ]
+              ];
+              
                 
                 foreach ($plans as $plan): ?>
                 <div class="col-xl-3 col-lg-4 col-md-6 mb-30">
@@ -272,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <label>Select Payment Method</label>
                                         <select class="form-control" id="cryptoCurrency">
                                             <option value="BTC">Bitcoin (BTC)</option>
-                                            <option value="USDT">Tether (USDT)</option>
+                                            <option value="USDT">Binance</option>
                                         </select>
                                     </div>
                                     
@@ -315,18 +351,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </section>
-
-    <footer class="footer bg_img">
-        <div class="footer__bottom">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 text-md-left text-center">
-                        <p>© 2024 <a href="dashboard.php" class="base--color">LAZADA</a>. All rights reserved</p>
-                    </div>
-                </div>
-            </div>
+     <!-- footer section start -->
+     <footer class="footer bg_img" data-background="https://th.bing.com/th/id/R.b3a438ddcea17c1c921d6da3dcaf4f4c?rik=pHs6Uhs2ZKKHSA&pid=ImgRaw&r" alt="image"></a></footer>
+  <div class="footer__top">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-12 text-center">
+          <a href="#0" class="footer-logo"><img src="https://freelogopng.com/images/all_img/1685524601lazada-logo-png.png" alt="image"></a>
+          <ul class="footer-short-menu d-flex flex-wrap justify-content-center mt-4">
+            <li><a href="#0">Home</a></li>
+            <li><a href="#0">Privacy & Policy</a></li>
+            <li><a href="#0">Terms & Conditions</a></li>
+          </ul>
         </div>
-    </footer>
+      </div>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 text-md-left text-center">
+          <p>© 2024 <a href="index.html" class="base--color">LAZADA</a>. All rights reserved</p>
+        </div>
+        <div class="col-md-6">
+          <ul class="social-link-list d-flex flex-wrap justify-content-md-end justify-content-center">
+            <li><a href="#0" data-toggle="tooltip" data-placement="top" title="facebook"><i class="lab la-facebook-f"></i></a></li>
+            <li><a href="#0" data-toggle="tooltip" data-placement="top" title="twitter"><i class="lab la-twitter"></i></a></li>
+            <li><a href="#0" data-toggle="tooltip" data-placement="top" title="pinterest"><i class="lab la-pinterest-p"></i></a></li>
+            <li><a href="#0" data-toggle="tooltip" data-placement="top" title="pinterest"><i class="lab la-pinterest-in"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- footer section end -->
 
     <script src="assets/js/vendor/jquery-3.5.1.min.js"></script>
     <script src="assets/js/vendor/bootstrap.bundle.min.js"></script>
@@ -336,8 +395,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
     const cryptoAddresses = {
-        'BTC': 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', // Example BTC address
-        'USDT': 'YOUR_USDT_ADDRESS' // Replace with your real USDT address
+        'BTC': '1AqSt62gpYTLF3SaqiAqukMdFb5QiSfc7k', 
+        'USDT': '0x92f474c4d3152d6a4e400ada508d28d0d9ffd821' // Replace with your real USDT address
     };
 
     let currentPlan = null;
