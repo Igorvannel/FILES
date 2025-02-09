@@ -221,6 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="section-header">
                         <h2 class="section-title"><span class="font-weight-normal">Investment</span> <span class="base--color">Plans</span></h2>
                         <p>To make a solid investment, you have to know where you are investing. Find a plan which is best for you.</p>
+                        <p> Bonus offer your  First  deposit: receive 5% of the amount of the transaction as a bonus! </p>
                     </div>
                 </div>
             </div>

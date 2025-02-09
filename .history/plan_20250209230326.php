@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 require_once 'config.php';
 
@@ -217,50 +221,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="section-header">
                         <h2 class="section-title"><span class="font-weight-normal">Investment</span> <span class="base--color">Plans</span></h2>
                         <p>To make a solid investment, you have to know where you are investing. Find a plan which is best for you.</p>
+                        <p> Bonus offer your  First  deposit: receive 5% of the amount of the transaction as a bonus! </p>
                     </div>
                 </div>
             </div>
 
             <div class="row justify-content-center mb-none-30">
                 <?php
-                $plans = [
-                    [
-                        'id' => 1,
-                        'name' => 'Slivestor',
-                        'return_rate' => '6%',
-                        'interval' => 'Every Week',
-                        'duration' => 'For 5 Week',
-                        'total_return' => 'Total 30% + Capital',
-                        'amount' => '200'
-                    ],
-                    [
-                        'id' => 2,
-                        'name' => 'Life Time',
-                        'return_rate' => '0.2%',
-                        'interval' => 'Every Day',
-                        'duration' => 'For Lifetime',
-                        'total_return' => 'Lifetime Earning',
-                        'amount' => '500'
-                    ],
-                    [
-                        'id' => 3,
-                        'name' => 'Black Horse',
-                        'return_rate' => '5%',
-                        'interval' => 'Every Week',
-                        'duration' => 'For 40 Week',
-                        'total_return' => 'Total 200%',
-                        'amount' => '5000'
-                    ],
-                    [
-                        'id' => 4,
-                        'name' => 'Silver',
-                        'return_rate' => '5%',
-                        'interval' => 'Every Day',
-                        'duration' => 'For 25 Day',
-                        'total_return' => 'Total 125%',
-                        'amount' => '500'
-                    ]
-                ];
+               $plans = [
+                [
+                    'id' => 1,
+                    'name' => 'Slivestor',
+                    'return_rate' => '6%',
+                    'interval' => 'Every Day',
+                    'duration' => 'For 30 Days',
+                    'total_return' => 'Total 180% + Capital',
+                    'amount' => '50'
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Bronze',
+                    'return_rate' => '$1',
+                    'interval' => 'Every Day', 
+                    'duration' => 'For Lifetime',
+                    'total_return' => 'Lifetime Earning',
+                    'amount' => '1000'
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Black Horse',
+                    'return_rate' => '10%',
+                    'interval' => 'Every Week',
+                    'duration' => 'For 40 Weeks', 
+                    'total_return' => 'Total 400%',
+                    'amount' => '200'
+                ],
+                [
+                    'id' => 4,
+                    'name' => 'Silver',
+                    'return_rate' => '2%',
+                    'interval' => 'Every Day',
+                    'duration' => 'For 30 Days',
+                    'total_return' => 'Total 60% + Capital',
+                    'amount' => '50'
+                ],
+                [
+                    'id' => 5,
+                    'name' => 'Elephant',
+                    'return_rate' => '1.354%',
+                    'interval' => 'Every Day',
+                    'duration' => 'For 30 Days',
+                    'total_return' => 'Total 40.62% + Capital',
+                    'amount' => '1000'
+                ],
+                [
+                    'id' => 6,
+                    'name' => 'Cobra',
+                    'return_rate' => '$2',
+                    'interval' => 'Every Hour',
+                    'duration' => 'For 168 Hours',
+                    'total_return' => 'Total 336 USD + Capital',
+                    'amount' => '5000'
+                ],
+                [
+                    'id' => 7,
+                    'name' => 'Lion',
+                    'return_rate' => '0.05%',
+                    'interval' => 'Every Day',
+                    'duration' => 'For Lifetime',
+                    'total_return' => 'Lifetime Earning',
+                    'amount' => '100'
+                ],
+                [
+                    'id' => 8,
+                    'name' => 'Tiger',
+                    'return_rate' => '5%',
+                    'interval' => 'Every Day',
+                    'duration' => 'For Lifetime',
+                    'total_return' => 'Lifetime Earning',
+                    'amount' => '500'
+                ]
+             ];
                 
                 foreach ($plans as $plan): ?>
                 <div class="col-xl-3 col-lg-4 col-md-6 mb-30">
@@ -421,8 +462,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function submitTransaction() {
-    const txHash = document.getElementById('txHash').value;
-    if (!txHash.trim()) {
+    const txHash = document.getElementById('txHash').value.trim();
+    if (!txHash) {
         alert('Please enter a transaction hash');
         return;
     }
@@ -430,9 +471,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const currency = document.getElementById('cryptoCurrency').value;
     const submitBtn = document.querySelector('.transaction-form button');
     
-    // Désactiver le bouton pendant le traitement
+    // Désactiver le bouton et montrer le chargement
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="las la-spinner la-spin"></i> Processing...';
+    
+    // Log des données envoyées
+    console.log('Sending data:', {
+        tx_hash: txHash,
+        currency: currency,
+        amount: currentPlan.amount,
+        plan_id: currentPlan.id
+    });
     
     $.ajax({
         url: window.location.href,
@@ -446,16 +495,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         },
         success: function(response) {
             console.log('Response:', response);
-            if(response.success) {
-                alert(response.message);
+            if(response && response.success) {
+                alert('Transaction submitted successfully');
                 window.location.href = 'dashboard.php';
             } else {
                 alert(response.message || 'Transaction failed');
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error:', error);
-            console.error('Response:', xhr.responseText);
+            console.error('AJAX Error:', {
+                status: status,
+                error: error,
+                response: xhr.responseText
+            });
             alert('Error submitting transaction. Please try again.');
         },
         complete: function() {
@@ -463,6 +515,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             submitBtn.innerHTML = 'Confirm Payment';
         }
     });
+
 }
     $('#cryptoCurrency').change(function() {
         updateQRCode($(this).val());
