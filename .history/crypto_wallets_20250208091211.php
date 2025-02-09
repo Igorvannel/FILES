@@ -17,6 +17,16 @@ $sql = "CREATE TABLE IF NOT EXISTS crypto_wallets (
 )";
 pg_query($conn, $sql);
 
-
+// Créer la table des transactions crypto si elle n'existe pas
+$sql = "CREATE TABLE IF NOT EXISTS transactions_crypto (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    tx_hash VARCHAR(100) UNIQUE,
+    currency VARCHAR(10) NOT NULL,
+    amount DECIMAL(15,8) NOT NULL,
+    usd_amount DECIMAL(15,2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
 pg_query($conn, $sql);
 ?>

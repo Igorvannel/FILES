@@ -1,11 +1,8 @@
 <?php
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
 require_once 'config.php';
 
+// Vérifiez si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
@@ -15,7 +12,7 @@ $user_id = $_SESSION['user_id'];
 $result = pg_query_params($conn, "SELECT email, balance FROM users WHERE id = $1", array($user_id));
 $user = pg_fetch_assoc($result);
 
-// Update the table creation SQL to include the 'type_invest' column with a default value
+// Créez la table transactions_crypto si elle n'existe pas déjà
 $sql = "CREATE TABLE IF NOT EXISTS transactions_crypto (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
@@ -23,63 +20,34 @@ $sql = "CREATE TABLE IF NOT EXISTS transactions_crypto (
     currency VARCHAR(10) NOT NULL,
     amount DECIMAL(15,8) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending',
-    type_invest VARCHAR(20) DEFAULT 'investment',  -- Added 'type_invest' column with default value
+    type_invest VARCHAR(20) DEFAULT 'investment',  -- Ajout de la colonne 'type_invest' avec valeur par défaut
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 pg_query($conn, $sql);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  header('Content-Type: application/json');
-  
-  if (isset($_POST['tx_hash'])) {
-      try {
-          $tx_hash = trim($_POST['tx_hash']);
-          $currency = trim($_POST['currency']);
-          $amount = floatval($_POST['amount']);
-          $plan_id = intval($_POST['plan_id']);
-          
-          // Validation des données
-          if (empty($tx_hash)) {
-              throw new Exception("Transaction hash is required");
-          }
-          
-          // Vérifier si le hash existe déjà
-          $check = pg_query_params($conn, 
-              "SELECT id FROM transactions_crypto WHERE tx_hash = $1", 
-              array($tx_hash)
-          );
-          
-          if (pg_num_rows($check) > 0) {
-              throw new Exception("This transaction has already been submitted");
-          }
-          
-          // Insérer la transaction
-          $result = pg_query_params($conn,
-              "INSERT INTO transactions_crypto (user_id, tx_hash, currency, amount, status, type_invest) 
-               VALUES ($1, $2, $3, $4, 'pending', 'investment') RETURNING id",
-              array($user_id, $tx_hash, $currency, $amount)
-          );
-          
-          if (!$result) {
-              throw new Exception(pg_last_error($conn));
-          }
-          
-          echo json_encode([
-              'success' => true,
-              'message' => 'Transaction submitted successfully'
-          ]);
-          
-      } catch (Exception $e) {
-          echo json_encode([
-              'success' => false,
-              'message' => $e->getMessage()
-          ]);
-      }
-      exit();
-  }
-
+    if (isset($_POST['tx_hash'])) {
+        $tx_hash = $_POST['tx_hash'];
+        $currency = $_POST['currency'];
+        $amount = $_POST['amount'];
+        
+        // Insérez la transaction dans la table transactions_crypto, y compris la colonne 'type_invest'
+        $result = pg_query_params($conn,
+            "INSERT INTO transactions_crypto (user_id, tx_hash, currency, amount, status, type_invest) 
+             VALUES ($1, $2, $3, $4, 'pending', 'investment')",  // Valeur par défaut pour 'type_invest'
+            array($user_id, $tx_hash, $currency, $amount)
+        );
+        
+        if($result) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Transaction failed']);
+        }
+        exit();
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -227,80 +195,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="row justify-content-center mb-none-30">
                 <?php
-               $plans = [
-                [
-                    'id' => 1,
-                    'name' => 'Slivestor',
-                    'return_rate' => '6%',
-                    'interval' => 'Every Day',
-                    'duration' => 'For 30 Days',
-                    'total_return' => 'Total 180% + Capital',
-                    'amount' => '50'
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Bronze',
-                    'return_rate' => '$1',
-                    'interval' => 'Every Day', 
-                    'duration' => 'For Lifetime',
-                    'total_return' => 'Lifetime Earning',
-                    'amount' => '1000'
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Black Horse',
-                    'return_rate' => '10%',
-                    'interval' => 'Every Week',
-                    'duration' => 'For 40 Weeks', 
-                    'total_return' => 'Total 400%',
-                    'amount' => '200'
-                ],
-                [
-                    'id' => 4,
-                    'name' => 'Silver',
-                    'return_rate' => '2%',
-                    'interval' => 'Every Day',
-                    'duration' => 'For 30 Days',
-                    'total_return' => 'Total 60% + Capital',
-                    'amount' => '50'
-                ],
-                [
-                    'id' => 5,
-                    'name' => 'Elephant',
-                    'return_rate' => '1.354%',
-                    'interval' => 'Every Day',
-                    'duration' => 'For 30 Days',
-                    'total_return' => 'Total 40.62% + Capital',
-                    'amount' => '1000'
-                ],
-                [
-                    'id' => 6,
-                    'name' => 'Cobra',
-                    'return_rate' => '$2',
-                    'interval' => 'Every Hour',
-                    'duration' => 'For 168 Hours',
-                    'total_return' => 'Total 336 USD + Capital',
-                    'amount' => '5000'
-                ],
-                [
-                    'id' => 7,
-                    'name' => 'Lion',
-                    'return_rate' => '0.05%',
-                    'interval' => 'Every Day',
-                    'duration' => 'For Lifetime',
-                    'total_return' => 'Lifetime Earning',
-                    'amount' => '100'
-                ],
-                [
-                    'id' => 8,
-                    'name' => 'Tiger',
-                    'return_rate' => '5%',
-                    'interval' => 'Every Day',
-                    'duration' => 'For Lifetime',
-                    'total_return' => 'Lifetime Earning',
-                    'amount' => '500'
-                ]
-             ];
+                $plans = [
+                  [
+                      'id' => 1,
+                      'name' => 'Slivestor',
+                      'return_rate' => '6%',
+                      'interval' => 'Every Week',
+                      'duration' => 'For 5 Week',
+                      'total_return' => 'Total 30% + Capital',
+                      'amount' => '200'
+                  ],
+                  [
+                      'id' => 2,
+                      'name' => 'Life Time',
+                      'return_rate' => '0.2%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For Lifetime',
+                      'total_return' => 'Lifetime Earning',
+                      'amount' => '50'
+                  ],
+                  [
+                      'id' => 3,
+                      'name' => 'Black Horse',
+                      'return_rate' => '5%',
+                      'interval' => 'Every Week',
+                      'duration' => 'For 40 Week',
+                      'total_return' => 'Total 200%',
+                      'amount' => '500'
+                  ],
+                  [
+                      'id' => 4,
+                      'name' => 'Silver',
+                      'return_rate' => '5%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For 25 Day',
+                      'total_return' => 'Total 125%',
+                      'amount' => '500'
+                  ],
+                  [
+                      'id' => 5,
+                      'name' => 'Elephant',
+                      'return_rate' => '1.1USD',
+                      'interval' => 'Every Day',
+                      'duration' => 'For 50 Day',
+                      'total_return' => 'Total 55USD + Capital',
+                      'amount' => '500'
+                  ],
+                  [
+                      'id' => 6,
+                      'name' => 'Cobra',
+                      'return_rate' => '10USD',
+                      'interval' => 'Every Hour',
+                      'duration' => 'For 150 Hour',
+                      'total_return' => 'Total 1500USD + Capital',
+                      'amount' => '1000'
+                  ],
+                  [
+                      'id' => 7,
+                      'name' => 'Lion',
+                      'return_rate' => '0.2%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For Lifetime',
+                      'total_return' => 'Lifetime Earning',
+                      'amount' => '100'
+                  ],
+                  [
+                      'id' => 8,
+                      'name' => 'Tiger',
+                      'return_rate' => '0.2%',
+                      'interval' => 'Every Day',
+                      'duration' => 'For Lifetime',
+                      'total_return' => 'Lifetime Earning',
+                      'amount' => '100'
+                  ]
+              ];
+              
                 
                 foreach ($plans as $plan): ?>
                 <div class="col-xl-3 col-lg-4 col-md-6 mb-30">
@@ -461,61 +430,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function submitTransaction() {
-    const txHash = document.getElementById('txHash').value.trim();
-    if (!txHash) {
-        alert('Please enter a transaction hash');
-        return;
+        const txHash = document.getElementById('txHash').value;
+        const currency = document.getElementById('cryptoCurrency').value;
+        
+        $.ajax({
+            url: 'plan.php',
+            method: 'POST',
+            data: {
+                tx_hash: txHash,
+                currency: currency,
+                amount: currentPlan.amount,
+                plan_id: currentPlan.id
+            },
+            success: function(response) {
+                try {
+                    const data = JSON.parse(response);
+                    if(data.success) {
+                        alert('Payment submitted successfully!');
+                        window.location.href = 'dashboard.php';
+                    } else {
+                        alert(data.message || 'Transaction failed');
+                    }
+                } catch(e) {
+                    alert('Error processing payment');
+                }
+            },
+            error: function() {
+                alert('Error submitting transaction');
+            }
+        });
     }
 
-    const currency = document.getElementById('cryptoCurrency').value;
-    const submitBtn = document.querySelector('.transaction-form button');
-    
-    // Désactiver le bouton et montrer le chargement
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="las la-spinner la-spin"></i> Processing...';
-    
-    // Log des données envoyées
-    console.log('Sending data:', {
-        tx_hash: txHash,
-        currency: currency,
-        amount: currentPlan.amount,
-        plan_id: currentPlan.id
-    });
-    
-    $.ajax({
-        url: window.location.href,
-        method: 'POST',
-        dataType: 'json',
-        data: {
-            tx_hash: txHash,
-            currency: currency,
-            amount: currentPlan.amount,
-            plan_id: currentPlan.id
-        },
-        success: function(response) {
-            console.log('Response:', response);
-            if(response && response.success) {
-                alert('Transaction submitted successfully');
-                window.location.href = 'dashboard.php';
-            } else {
-                alert(response.message || 'Transaction failed');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', {
-                status: status,
-                error: error,
-                response: xhr.responseText
-            });
-            alert('Error submitting transaction. Please try again.');
-        },
-        complete: function() {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Confirm Payment';
-        }
-    });
-
-}
     $('#cryptoCurrency').change(function() {
         updateQRCode($(this).val());
     });
