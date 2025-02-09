@@ -193,44 +193,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="row justify-content-center mb-none-30">
                 <?php
-                $plans = [
-                    [
-                        'id' => 1,
-                        'name' => 'Slivestor',
-                        'return_rate' => '6%',
-                        'interval' => 'Every Week',
-                        'duration' => 'For 5 Week',
-                        'total_return' => 'Total 30% + Capital',
-                        'amount' => '200'
-                    ],
-                    [
-                        'id' => 2,
-                        'name' => 'Life Time',
-                        'return_rate' => '0.2%',
-                        'interval' => 'Every Day',
-                        'duration' => 'For Lifetime',
-                        'total_return' => 'Lifetime Earning',
-                        'amount' => '500'
-                    ],
-                    [
-                        'id' => 3,
-                        'name' => 'Black Horse',
-                        'return_rate' => '5%',
-                        'interval' => 'Every Week',
-                        'duration' => 'For 40 Week',
-                        'total_return' => 'Total 200%',
-                        'amount' => '5000'
-                    ],
-                    [
-                        'id' => 4,
-                        'name' => 'Silver',
-                        'return_rate' => '5%',
-                        'interval' => 'Every Day',
-                        'duration' => 'For 25 Day',
-                        'total_return' => 'Total 125%',
-                        'amount' => '500'
-                    ]
-                ];
+               $plans = [
+                [
+                    'id' => 1,
+                    'name' => 'Slivesto',
+                    'return_rate' => '6% / Day',
+                    'interval' => 'Every Day',
+                    'duration' => 'For 30 Days',
+                    'total_return' => 'Total 180% + Capital',
+                    'amount' => '50 - 200'
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Bronze',
+                    'return_rate' => '$1 / Day',
+                    'interval' => 'Every Day',
+                    'duration' => 'For Lifetime',
+                    'total_return' => 'Lifetime Earning',
+                    'amount' => '100 - 1000'
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Black Horse',
+                    'return_rate' => '10% / Week',
+                    'interval' => 'Every Week',
+                    'duration' => 'For 40 Weeks',
+                    'total_return' => 'Total 400%',
+                    'amount' => '200 - 1000'
+                ],
+                [
+                    'id' => 4,
+                    'name' => 'Silver',
+                    'return_rate' => '2% / Day',
+                    'interval' => 'Every Day',
+                    'duration' => 'For 30 Days',
+                    'total_return' => 'Total 60% + Capital',
+                    'amount' => '50 - 5000'
+                ],
+                [
+                    'id' => 5,
+                    'name' => 'Elephant',
+                    'return_rate' => '1.354% / Day',
+                    'interval' => 'Every Day',
+                    'duration' => 'For 30 Days',
+                    'total_return' => 'Total 40.62% + Capital',
+                    'amount' => '50 - 1000'
+                ],
+                [
+                    'id' => 6,
+                    'name' => 'Cobra',
+                    'return_rate' => '$2 / Hour',
+                    'interval' => 'Every Hour',
+                    'duration' => 'For 168 Hours',
+                    'total_return' => 'Total 336 USD + Capital',
+                    'amount' => '50 - 5000'
+                ],
+                [
+                    'id' => 7,
+                    'name' => 'Lion',
+                    'return_rate' => '0.05% / Day',
+                    'interval' => 'Every Day',
+                    'duration' => 'For Lifetime',
+                    'total_return' => 'Lifetime Earning',
+                    'amount' => '100 - 5000'
+                ],
+                [
+                    'id' => 8,
+                    'name' => 'Tiger',
+                    'return_rate' => '5% / Day',
+                    'interval' => 'Every Day',
+                    'duration' => 'For Lifetime',
+                    'total_return' => 'Lifetime Earning',
+                    'amount' => '500 - 5000'
+                ]
+            ];
+            
                 
                 foreach ($plans as $plan): ?>
                 <div class="col-xl-3 col-lg-4 col-md-6 mb-30">
