@@ -91,7 +91,7 @@ $transactions = pg_query_params($conn, $query, array($user_id));
                             <li><a href="dashboard.php">Dashboard</a></li>
                             <li><a href="plan.php">Invest</a></li>
                             <li><a href="transactions.php">Transactions</a></li>
-                            <li><a href="referral.php">Referrals</a></li>
+                          
                             <li><a href="logout.php">Logout</a></li>
                         </ul>
                         <div class="nav-right">
@@ -255,7 +255,7 @@ $transactions = pg_query_params($conn, $query, array($user_id));
                             <label>Select Payment Method</label>
                             <select class="form-control" id="paymentMethod">
                                 <option value="BTC">Bitcoin (BTC)</option>
-                                <option value="USDT">USDT (TRC20)</option>
+                                <option value="USDT">Binance</option>
                             </select>
                         </div>
 
