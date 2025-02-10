@@ -1,5 +1,4 @@
 <?php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -15,7 +14,7 @@ $user_id = $_SESSION['user_id'];
 $result = pg_query_params($conn, "SELECT email, balance FROM users WHERE id = $1", array($user_id));
 $user = pg_fetch_assoc($result);
 
-// Update the table creation SQL to include the 'type_invest' column with a default value
+// Création de la table transactions_crypto si elle n'existe pas
 $sql = "CREATE TABLE IF NOT EXISTS transactions_crypto (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
@@ -23,63 +22,96 @@ $sql = "CREATE TABLE IF NOT EXISTS transactions_crypto (
     currency VARCHAR(10) NOT NULL,
     amount DECIMAL(15,8) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending',
-    type_invest VARCHAR(20) DEFAULT 'investment',  -- Added 'type_invest' column with default value
+    type_invest VARCHAR(20) DEFAULT 'investment',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 pg_query($conn, $sql);
 
+// Traitement de la soumission du paiement
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  header('Content-Type: application/json');
-  
-  if (isset($_POST['tx_hash'])) {
-      try {
-          $tx_hash = trim($_POST['tx_hash']);
-          $currency = trim($_POST['currency']);
-          $amount = floatval($_POST['amount']);
-          $plan_id = intval($_POST['plan_id']);
-          
-          // Validation des données
-          if (empty($tx_hash)) {
-              throw new Exception("Transaction hash is required");
-          }
-          
-          // Vérifier si le hash existe déjà
-          $check = pg_query_params($conn, 
-              "SELECT id FROM transactions_crypto WHERE tx_hash = $1", 
-              array($tx_hash)
-          );
-          
-          if (pg_num_rows($check) > 0) {
-              throw new Exception("This transaction has already been submitted");
-          }
-          
-          // Insérer la transaction
-          $result = pg_query_params($conn,
-              "INSERT INTO transactions_crypto (user_id, tx_hash, currency, amount, status, type_invest) 
-               VALUES ($1, $2, $3, $4, 'pending', 'investment') RETURNING id",
-              array($user_id, $tx_hash, $currency, $amount)
-          );
-          
-          if (!$result) {
-              throw new Exception(pg_last_error($conn));
-          }
-          
-          echo json_encode([
-              'success' => true,
-              'message' => 'Transaction submitted successfully'
-          ]);
-          
-      } catch (Exception $e) {
-          echo json_encode([
-              'success' => false,
-              'message' => $e->getMessage()
-          ]);
-      }
-      exit();
-  }
+    header('Content-Type: application/json');
+    
+    if (isset($_POST['tx_hash'])) {
+        try {
+            $tx_hash = trim($_POST['tx_hash']);
+            $currency = trim($_POST['currency']);
+            $amount = floatval($_POST['amount']);
+            $plan_id = intval($_POST['plan_id']);
+            
+            // Vérification du premier dépôt
+            $first_deposit_check = pg_query_params($conn, 
+                "SELECT COUNT(*) FROM transactions_crypto WHERE user_id = $1",
+                array($user_id)
+            );
+            $is_first_deposit = (pg_fetch_result($first_deposit_check, 0, 0) == 0);
 
+            // Début de la transaction
+            pg_query($conn, "BEGIN");
+            
+            // Vérification si le hash existe déjà
+            $check = pg_query_params($conn, 
+                "SELECT id FROM transactions_crypto WHERE tx_hash = $1", 
+                array($tx_hash)
+            );
+            
+            if (pg_num_rows($check) > 0) {
+                throw new Exception("This transaction has already been submitted");
+            }
+            
+            // Insertion de la transaction
+            $result = pg_query_params($conn,
+                "INSERT INTO transactions_crypto (user_id, tx_hash, currency, amount, status, type_invest) 
+                 VALUES ($1, $2, $3, $4, 'pending', 'investment') RETURNING id",
+                array($user_id, $tx_hash, $currency, $amount)
+            );
+
+            if (!$result) {
+                throw new Exception(pg_last_error($conn));
+            }
+
+            // Bonus de premier dépôt (5%)
+            if ($is_first_deposit) {
+                $bonus_amount = $amount * 0.05;
+                pg_query_params($conn,
+                    "UPDATE users SET balance = balance + $1 WHERE id = $2",
+                    array($bonus_amount, $user_id)
+                );
+            }
+
+            // Vérification parrainage
+            $referral_query = "SELECT referred_by FROM users WHERE id = $1";
+            $referral_result = pg_query_params($conn, $referral_query, array($user_id));
+            $referral = pg_fetch_assoc($referral_result);
+            
+            if ($referral['referred_by']) {
+                $referral_bonus = $amount * 0.05;
+                
+                // Enregistrement bonus parrainage
+                pg_query_params($conn,
+                    "INSERT INTO referral_earnings (referrer_id, referred_id, investment_amount, bonus_amount) 
+                     VALUES ($1, $2, $3, $4)",
+                    array($referral['referred_by'], $user_id, $amount, $referral_bonus)
+                );
+                
+                // Mise à jour du solde du parrain
+                pg_query_params($conn,
+                    "UPDATE users SET referral_earnings = referral_earnings + $1 WHERE id = $2",
+                    array($referral_bonus, $referral['referred_by'])
+                );
+            }
+            
+            pg_query($conn, "COMMIT");
+            echo json_encode(['success' => true, 'message' => 'Transaction submitted successfully']);
+            
+        } catch (Exception $e) {
+            pg_query($conn, "ROLLBACK");
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -196,6 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <li><a href="dashboard.php">Dashboard</a></li>
                             <li><a href="plan.php">Invest</a></li>
                             <li><a href="transactions.php">Transactions</a></li>
+                            <li><a href="referral.php">Referrals</a></li>
                             <li><a href="logout.php">Logout</a></li>
                         </ul>
                         <div class="nav-right">

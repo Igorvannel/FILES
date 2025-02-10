@@ -77,6 +77,7 @@ if (!$transactions) {
                             <li><a href="dashboard.php">Dashboard</a></li>
                             <li><a href="plan.php">Invest</a></li>
                             <li><a class="active" href="transactions.php">Transactions</a></li>
+                            <li><a href="referral.php">Referrals</a></li>
                             <li><a href="logout.php">Logout</a></li>
                         </ul>
                         <div class="nav-right">

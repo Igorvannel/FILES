@@ -91,7 +91,7 @@ $transactions = pg_query_params($conn, $query, array($user_id));
                             <li><a href="dashboard.php">Dashboard</a></li>
                             <li><a href="plan.php">Invest</a></li>
                             <li><a href="transactions.php">Transactions</a></li>
-                          
+                            <li><a href="referral.php">Referrals</a></li>
                             <li><a href="logout.php">Logout</a></li>
                         </ul>
                         <div class="nav-right">

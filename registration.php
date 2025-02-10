@@ -1,36 +1,82 @@
 <?php
-
 session_start();
 require_once 'config.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $fullname = filter_input(INPUT_POST, 'fullname', FILTER_SANITIZE_STRING);
-    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    
-    // Vérifier si l'email existe déjà
-    $check_email = pg_query_params($conn, 
-        "SELECT id FROM users WHERE email = $1", 
-        array($email)
-    );
-    
-    if (pg_num_rows($check_email) > 0) {
-        $_SESSION['error'] = "Cet email est déjà enregistré.";
-    } else {
-        $result = pg_query_params($conn,
-            "INSERT INTO users (fullname, email, password) VALUES ($1, $2, $3) RETURNING id",
-            array($fullname, $email, $password)
-        );
-        
-        if ($result) {
-            $_SESSION['success'] = "Inscription réussie! Veuillez vous connecter.";
-            header("Location: login.php");
-            exit();
-        } else {
-            $_SESSION['error'] = "Erreur lors de l'inscription: " . pg_last_error($conn);
-        }
+function generateReferralCode($length = 8) {
+    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $code = '';
+    for ($i = 0; $i < $length; $i++) {
+        $code .= $characters[rand(0, strlen($characters) - 1)];
     }
+    return $code;
 }
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $fullname = filter_input(INPUT_POST, 'fullname', FILTER_SANITIZE_STRING);
+  $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+  $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+  $referral_code = generateReferralCode();
+  
+  // Récupérer le code de parrainage soit de l'URL soit du formulaire
+  $referred_by = isset($_GET['ref']) ? $_GET['ref'] : (
+      !empty($_POST['referral_code']) ? $_POST['referral_code'] : null
+  );
+  
+  // Vérifier si l'email existe déjà
+  $check_email = pg_query_params($conn, 
+      "SELECT id FROM users WHERE email = $1", 
+      array($email)
+  );
+  
+  if (pg_num_rows($check_email) > 0) {
+      $_SESSION['error'] = "Cet email est déjà enregistré.";
+  } else {
+      // Début de la transaction
+      pg_query($conn, "BEGIN");
+      
+      try {
+          // Insérer le nouvel utilisateur
+          if ($referred_by) {
+              // Vérifier si le code de parrainage existe
+              $ref_query = pg_query_params($conn, 
+                  "SELECT id FROM users WHERE referral_code = $1", 
+                  array($referred_by)
+              );
+              $referrer = pg_fetch_assoc($ref_query);
+              
+              if ($referrer) {
+                  $result = pg_query_params($conn,
+                      "INSERT INTO users (fullname, email, password, referral_code, referred_by) 
+                       VALUES ($1, $2, $3, $4, $5) RETURNING id",
+                      array($fullname, $email, $password, $referral_code, $referrer['id'])
+                  );
+              } else {
+                  throw new Exception("Code de parrainage invalide");
+              }
+          } else {
+              $result = pg_query_params($conn,
+                  "INSERT INTO users (fullname, email, password, referral_code) 
+                   VALUES ($1, $2, $3, $4) RETURNING id",
+                  array($fullname, $email, $password, $referral_code)
+              );
+          }
+          
+          if ($result) {
+              pg_query($conn, "COMMIT");
+              $_SESSION['success'] = "Inscription réussie! Veuillez vous connecter.";
+              header("Location: login.php");
+              exit();
+          } else {
+              throw new Exception("Erreur lors de l'inscription");
+          }
+      } catch (Exception $e) {
+          pg_query($conn, "ROLLBACK");
+          $_SESSION['error'] = "Erreur: " . $e->getMessage();
+      }
+  }
+}
+// Si l'utilisateur arrive via un lien de parrainage
+$ref = isset($_GET['ref']) ? $_GET['ref'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -87,7 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php if(isset($_SESSION['success'])): ?>
                     <div class="alert alert-success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
                 <?php endif; ?>
-                <form class="mt-4" method="POST" action="">
+                <form class="mt-4" method="POST" action="<?php echo $ref ? "?ref=".$ref : ""; ?>">
                   <div class="form-group">
                     <label>Full Name</label>
                     <input type="text" name="fullname" class="form-control" required>
@@ -99,6 +145,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                   <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                     <label>Referral Code (Optional)</label>
+                     <input type="text" name="referral_code" class="form-control" 
+                       value="<?php echo isset($_GET['ref']) ? htmlspecialchars($_GET['ref']) : ''; ?>" 
+                            placeholder="Enter referral code if you have one">
                   </div>
                   <div class="form-row">
                     <div class="col-sm-6">
