@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [
                     'id' => 2,
                     'name' => 'Bronze',
-                    'return_rate' => '$1',
+                    'return_rate' => '$10',
                     'interval' => 'Every Day', 
                     'duration' => 'For Lifetime',
                     'total_return' => 'Lifetime Earning',
@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'name' => 'Silver',
                     'return_rate' => '2%',
                     'interval' => 'Every Day',
-                    'duration' => 'For 30 Days',
+                    'duration' => 'For 60 Days',
                     'total_return' => 'Total 60% + Capital',
                     'amount' => '50'
                 ],
